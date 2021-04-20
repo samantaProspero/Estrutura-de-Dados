@@ -1,6 +1,7 @@
 #include <iostream>
 #include "fila.h"
 #include <cstddef> //NULL
+#include <new>
 
 
 using namespace std;
@@ -82,7 +83,7 @@ TipoItem fila::remover(){
 
 //print
 void fila::imprimir(){
-  No* temp;
+  No* temp = primeiro;
   cout << "Fila: [ ";
   while (temp != NULL)
   {
