@@ -1,88 +1,166 @@
 #include <iostream>
-#include "hash.h"
+#include <cstddef>
+#include "arvore.h"
 
 using namespace std;
 
-int Hash::FuncaoHash(Aluno aluno){
-  return (aluno.obterRa() % max_posicoes);
+BST::BST(){
+  raiz = NULL;
 }
 
-Hash::Hash(int tam_vetor, int max){
-  quant_itens = 0;
-  max_itens = max;
-  max_posicoes = tam_vetor;
-  estrutura = new Aluno[tam_vetor];
+BST::~BST(){
+  deletarArvore(raiz);
 }
 
-Hash::~Hash(){
-  delete [] estrutura;
+void BST::deletarArvore(No* Noatual){
+  if (Noatual != NULL){
+    deletarArvore(Noatual->filhoesquerda);
+
+    deletarArvore(Noatual->filhodireita);
+
+    delete Noatual;
+  }
 }
 
-bool Hash::estacheio(){
-  return (quant_itens == max_itens);
+No* BST::obterRaiz(){
+  return raiz;
+}
+bool BST::estacheio(){
+  try{
+    No* temp = new No;
+    delete temp;
+    return false;
+  }
+  catch(bad_alloc exception){
+    return true;
+  }
+  
+}
+bool BST::estavazio(){
+  return (raiz == NULL);
 }
 
-int Hash::obterTamanhoAtual(){
-  return (quant_itens);
-}
-
-void Hash::inserir(Aluno aluno){
+void BST::inserir(Aluno aluno){
   if(estacheio()){
-    cout << "A tabela Hash está cheia!\n";
+    cout << "A tabela BST está cheia!\n";
     cout << "O elemento não pode ser inserido!\n";
-  }else{
-    int local = FuncaoHash(aluno);
-    while (estrutura[local].obterRa() > 0){
-      local = (local + 1) % max_posicoes;
+  } else {
+
+    No* NoNovo = new No;
+    NoNovo->aluno = aluno;
+    NoNovo->filhodireita = NULL;
+    NoNovo->filhoesquerda = NULL;
+
+    if (raiz==NULL){
+      raiz = NoNovo;
+    } else {
+
+      No* temp = raiz;
+      while (temp != NULL){
+        if (aluno.obterRa() < temp->aluno.obterRa()){
+          if(temp->filhoesquerda == NULL){
+            temp->filhoesquerda = NoNovo;
+            break;
+          } else {
+            temp = temp->filhoesquerda;
+          }
+        } else {
+          if(temp->filhodireita == NULL){
+            temp->filhodireita = NoNovo;
+            break;
+          } else {
+            temp = temp->filhodireita; 
+          }
+        }
+      }
     }
-  estrutura[local]= aluno;
-  quant_itens++;
   }
 }
 
-void Hash::deletar(Aluno aluno){
-  int local = FuncaoHash(aluno);
-  bool teste = false;
-  while (estrutura[local].obterRa() != -1){
-    if (estrutura[local].obterRa() == aluno.obterRa()){
-      cout << "Elemento removido!\n";
-      estrutura[local] = Aluno(-2, " ");
-      quant_itens--;
-      teste = true;
-      break;
-    }
-    local = (local+1) % max_posicoes;
-  }
-  if(!teste){
-    cout << "O elemento não encontrado!\n";
-    cout << "Nenhum elemento foi removido!\n";
+void BST::remover(Aluno aluno){
+  removerbusca(aluno, raiz);
+}
+
+void BST::removerbusca(Aluno aluno, No*& noatual){
+
+  if (aluno.obterRa() < noatual->aluno.obterRa()){
+    removerbusca(aluno, noatual->filhoesquerda);
+  } else if (aluno.obterRa() > noatual->aluno.obterRa()){
+    removerbusca(aluno, noatual->filhodireita);
+  } else {
+    deletarNo(noatual);
+  }  
+
+}
+
+void BST::deletarNo(No*& noatual){
+  No* temp = noatual;
+  if (noatual->filhoesquerda == NULL){
+    noatual = noatual->filhodireita;
+    delete temp;
+  } else if (noatual->filhodireita == NULL){
+    noatual = noatual->filhoesquerda;
+    delete temp;
+  } else {
+    Aluno AlunoSucessor;
+    obterSucessor(AlunoSucessor, noatual);
+    noatual->aluno = AlunoSucessor;
+    removerbusca(AlunoSucessor, noatual->filhodireita);
   }
 }
 
-void Hash::buscar(Aluno& aluno, bool& busca){
-  int local = FuncaoHash(aluno);
+void BST::obterSucessor(Aluno& AlunoSucessor, No* temp){
+  temp = temp->filhodireita;
+  while (temp->filhoesquerda != NULL){
+    temp = temp->filhoesquerda;
+  }
+  AlunoSucessor = temp->aluno;
+}
+
+void BST::buscar(Aluno& aluno, bool& busca){
   busca = false;
-  while (estrutura[local].obterRa() != -1){
-    if (estrutura[local].obterRa() == aluno.obterRa()){
+  No* noatual = raiz;
+  while (noatual != NULL){
+    if (aluno.obterRa() < noatual->aluno.obterRa()){
+      noatual = noatual->filhoesquerda;
+    } else if (aluno.obterRa() > noatual->aluno.obterRa()){
+      noatual = noatual->filhodireita;
+    } else{
       busca = true;
-      aluno = estrutura[local];
+      aluno = noatual->aluno;
       break;
     }
-    local = (local+1) % max_posicoes;
-  }
-  if(!busca){
-    cout << "O elemento não encontrado!\n";
+
   }
 }
 
+void BST::imprimirpreordem(No* Noatual){
+  if (Noatual != NULL){
+    cout << Noatual->aluno.obterNome() << ": ";
+    cout << Noatual->aluno.obterRa() << endl;
 
-void Hash::imprimir(){
-  cout << "Tabela Hash: \n";
-  for(int i=0; i<max_posicoes; i++){
-    if(estrutura[i].obterRa() > 0){
-      cout << i << ": " << estrutura[i].obterRa() << " ";
-      cout << estrutura[i].obterNome() << endl;
-    }
+    imprimirpreordem(Noatual->filhoesquerda);
+    imprimirpreordem(Noatual->filhodireita);
   }
+}
+
+void BST::imprimiremordem(No* Noatual){
+  if (Noatual != NULL){
+    imprimiremordem(Noatual->filhoesquerda);
+
+    cout << Noatual->aluno.obterNome() << ": ";
+    cout << Noatual->aluno.obterRa() << endl;
+
+    imprimiremordem(Noatual->filhodireita);            
+}}
+
+void BST::imprimirposordem(No* Noatual){
+  if (Noatual != NULL){
+    imprimirposordem(Noatual->filhoesquerda);
+    imprimirposordem(Noatual->filhodireita);
+
+    cout << Noatual->aluno.obterNome() << ": ";
+    cout << Noatual->aluno.obterRa() << endl;            
+  }            
 }
 

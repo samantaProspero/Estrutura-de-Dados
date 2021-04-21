@@ -1,22 +1,32 @@
+#include <iostream>
 #include "aluno.h"
 
-class Hash {
+struct No {
+  Aluno aluno;
+  No* filhoesquerda;
+  No* filhodireita;
+};
+
+class BST { //Binary Search Tree
   private:
-    int FuncaoHash(Aluno aluno);
-    int max_itens;
-    int max_posicoes;
-    int quant_itens;
-    Aluno* estrutura;
+    No* raiz;
 
   public:
-    Hash(int tam_vetor, int max);
-    ~Hash();
+    BST();
+    ~BST();
+    void deletarArvore(No* Noatual);
+    No* obterRaiz();
     bool estacheio();
-    int obterTamanhoAtual();
+    bool estavazio();
     void inserir(Aluno aluno);
-    void deletar(Aluno aluno);
+    void remover(Aluno aluno);
+    void removerbusca(Aluno aluno, No*& noatual);
+    void deletarNo(No*& noatual);
+    void obterSucessor(Aluno& AlunoSucessor, No* temp);
     void buscar(Aluno& aluno, bool& busca); // &: valor por referencia, tudo q alterar aqui, altera também no main
-    void imprimir();
+    void imprimirpreordem(No* Noatual);
+    void imprimiremordem(No* Noatual);
+    void imprimirposordem(No* Noatual);
 };
 
 
